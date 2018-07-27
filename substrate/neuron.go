@@ -10,6 +10,14 @@ type neuron struct {
 	outgoing []chan float64
 }
 
+func (n *neuron) addIncLink(l chan float64) {
+	n.incoming = append(n.incoming, l)
+}
+
+func (n *neuron) addOutLink(l chan float64) {
+	n.outgoing = append(n.outgoing, l)
+}
+
 func sigmoig(inp float64) float64 {
 	if inp <= -8.0 {
 		return -1.0
