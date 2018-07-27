@@ -31,3 +31,12 @@ func merge(cs ...chan float64) chan float64 {
 
 	return out
 }
+
+func strIn(arr []string, s string) bool {
+	for _, x := range arr {
+		if x == s {
+			return true
+		}
+	}
+	return false
+}
