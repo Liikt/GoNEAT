@@ -6,7 +6,7 @@ type link struct {
 	weight float64
 }
 
-func (l *link) set() {
+func (l *link) run() {
 	v := <-l.src
 	l.dst <- v * l.weight
 }
