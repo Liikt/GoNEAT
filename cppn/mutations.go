@@ -16,7 +16,7 @@ func mutateWrapper(flag bool, f mutateFunc, chance float64, funcName string) {
 	}
 }
 
-func (g *genome) mutateEnableDisable(enable bool) {
+func (g *Genome) mutateEnableDisable(enable bool) {
 	candidates := make([]string, 0)
 
 	for _, gene := range g.genes {
@@ -32,7 +32,7 @@ func (g *genome) mutateEnableDisable(enable bool) {
 	g.genes[candidates[rand.Intn(len(candidates))]].enabled = !g.genes[candidates[rand.Intn(len(candidates))]].enabled
 }
 
-func (g *genome) mutateLink(forceBias bool) {
+func (g *Genome) mutateLink(forceBias bool) {
 	ret := -1
 
 	for ok := false; !ok; ok = ret == 0 {
@@ -61,7 +61,7 @@ func (g *genome) mutateLink(forceBias bool) {
 	}
 }
 
-func (g *genome) mutateWeights(_ bool) {
+func (g *Genome) mutateWeights(_ bool) {
 	c := make(chan bool)
 	for _, ge := range g.genes {
 		go func(ge *gene, c chan bool) {
@@ -79,7 +79,7 @@ func (g *genome) mutateWeights(_ bool) {
 	}
 }
 
-func (g *genome) mutateNode(_ bool) {
+func (g *Genome) mutateNode(_ bool) {
 	geneIndex := rand.Intn(len(g.genes))
 	nameArr := keyGene(g.genes)
 
@@ -106,7 +106,7 @@ func (g *genome) mutateNode(_ bool) {
 	g.numNodes++
 }
 
-func (g *genome) mutateFunctions(_ bool) {
+func (g *Genome) mutateFunctions(_ bool) {
 	for _, neuron := range g.neurons {
 		if rand.Intn(3) == 0 {
 			neuron.function = functions[rand.Intn(len(functions))]
@@ -114,7 +114,7 @@ func (g *genome) mutateFunctions(_ bool) {
 	}
 }
 
-func (g *genome) randomNeuron(noIn bool) string {
+func (g *Genome) randomNeuron(noIn bool) string {
 	labelsAdList := keysNeuron(g.neurons)
 	i := rand.Intn(len(g.neurons))
 

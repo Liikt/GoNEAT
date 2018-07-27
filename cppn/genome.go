@@ -8,12 +8,12 @@ import (
 	"strings"
 )
 
-type genome struct {
+type Genome struct {
 	inputNodes    []chan float64
 	outputNode    chan float64
 	numNodes      int
 	maxNeurons    int
-	fitness       float64
+	Fitness       float64
 	genes         map[string]*gene
 	neurons       map[string]*neuron
 	network       map[string][]string
@@ -21,10 +21,10 @@ type genome struct {
 	staticRates   map[string]float64
 }
 
-func initGenome() *genome {
-	g := new(genome)
+func initGenome() *Genome {
+	g := new(Genome)
 	g.numNodes = 5
-	g.fitness = 0.0
+	g.Fitness = 0.0
 	g.genes = make(map[string]*gene)
 	g.neurons = make(map[string]*neuron)
 	g.network = make(map[string][]string)
@@ -46,7 +46,7 @@ func initGenome() *genome {
 	return g
 }
 
-func (g *genome) basicNetwork() {
+func (g *Genome) basicNetwork() {
 	outNode := initNeuron("OutN")
 	g.neurons[outNode.id] = outNode
 	g.network[outNode.id] = []string{}
@@ -72,7 +72,7 @@ func (g *genome) basicNetwork() {
 	g.addLink(biasNode, outNode, nil, "BiasLink")
 }
 
-func (g *genome) addLink(fromNode, intoNode *neuron, ge *gene, id string) int {
+func (g *Genome) addLink(fromNode, intoNode *neuron, ge *gene, id string) int {
 	if _, ok := g.network[fromNode.id]; !ok {
 		fmt.Println("Just tried to add a link " + ge.id + " to a nonexisting outgoing node.")
 		return -1
@@ -124,17 +124,17 @@ func (g *genome) addLink(fromNode, intoNode *neuron, ge *gene, id string) int {
 	return 0
 }
 
-func (g *genome) containsLink(link *gene) bool {
+func (g *Genome) containsLink(link *gene) bool {
 	if _, ok := g.genes[link.id]; ok {
 		return true
 	}
 	return false
 }
 
-func (g *genome) copy() *genome {
+func (g *Genome) copy() *Genome {
 	newGenome := initGenome()
 	newGenome.numNodes = g.numNodes
-	newGenome.fitness = g.fitness
+	newGenome.Fitness = g.Fitness
 	newGenome.network = g.network
 	newGenome.mutationRates = g.mutationRates
 	newGenome.staticRates = g.staticRates
@@ -163,7 +163,7 @@ func (g *genome) copy() *genome {
 	return newGenome
 }
 
-func (g *genome) GetWeight(x1, y1, x2, y2 float64) float64 {
+func (g *Genome) GetWeight(x1, y1, x2, y2 float64) float64 {
 	for _, gene := range g.genes {
 		go gene.run()
 	}
@@ -180,7 +180,7 @@ func (g *genome) GetWeight(x1, y1, x2, y2 float64) float64 {
 	return <-g.outputNode
 }
 
-func (g *genome) mutate() {
+func (g *Genome) mutate() {
 	for key, val := range g.mutationRates {
 		i := rand.Intn(2)
 		if i == 1 {
@@ -231,7 +231,7 @@ func (g *genome) mutate() {
 	}
 }
 
-func (g *genome) disjointGenes(other *genome) float64 {
+func (g *Genome) disjointGenes(other *Genome) float64 {
 	innovationSet1 := make([]int, len(g.genes))
 	innovationSet2 := make([]int, len(other.genes))
 	counter := 0
@@ -255,7 +255,7 @@ func (g *genome) disjointGenes(other *genome) float64 {
 	return float64(<-c+<-c) / math.Max(float64(len(g.genes)), float64(len(other.genes)))
 }
 
-func (g *genome) weightGap(other *genome) float64 {
+func (g *Genome) weightGap(other *Genome) float64 {
 	innoToObj1 := make(map[int]*gene)
 	innoToObj2 := make(map[int]*gene)
 	weightDiff := 0.0
@@ -277,15 +277,15 @@ func (g *genome) weightGap(other *genome) float64 {
 	return weightDiff / float64(len(matching))
 }
 
-func (g *genome) shareFunction(other *genome) bool {
+func (g *Genome) shareFunction(other *Genome) bool {
 	geneticDifference := deltaDisjoint * g.disjointGenes(other)
 	weightDifference := weightScale * g.weightGap(other)
 
 	return (geneticDifference + weightDifference) < deltaThreshold
 }
 
-func (g *genome) crossover(other *genome) *genome {
-	if other.fitness > g.fitness {
+func (g *Genome) crossover(other *Genome) *Genome {
+	if other.Fitness > g.Fitness {
 		g, other = other, g
 	}
 
@@ -366,7 +366,7 @@ func (g *genome) crossover(other *genome) *genome {
 	return child
 }
 
-func (g *genome) Debug() {
+func (g *Genome) Debug() {
 	for _, i := range g.neurons {
 		fmt.Println(i.String())
 	}

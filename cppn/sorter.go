@@ -3,11 +3,11 @@ package cppn
 import "sort"
 
 type genomeSorter struct {
-	genes []*genome
-	by    func(p1, p2 *genome) bool
+	genes []*Genome
+	by    func(p1, p2 *Genome) bool
 }
 
-type byFunc func(p1, p2 *genome) bool
+type byFunc func(p1, p2 *Genome) bool
 
 func (s *genomeSorter) Len() int {
 	return len(s.genes)
@@ -21,7 +21,7 @@ func (s *genomeSorter) Swap(i, j int) {
 	s.genes[i], s.genes[j] = s.genes[j], s.genes[i]
 }
 
-func (by byFunc) Sort(genomes []*genome) {
+func (by byFunc) Sort(genomes []*Genome) {
 	ps := &genomeSorter{
 		genes: genomes,
 		by:    by,
@@ -30,8 +30,8 @@ func (by byFunc) Sort(genomes []*genome) {
 }
 
 func sortGenomes(g *species) {
-	f := func(g1, g2 *genome) bool {
-		return g1.fitness > g2.fitness
+	f := func(g1, g2 *Genome) bool {
+		return g1.Fitness > g2.Fitness
 	}
 	byFunc(f).Sort(g.genomes)
 }

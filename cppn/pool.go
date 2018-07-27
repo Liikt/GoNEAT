@@ -6,24 +6,20 @@ import (
 	"github.com/liikt/GoNEAT/Game"
 )
 
-type pool struct {
+type Pool struct {
 	poolSize       int
-	numInputNodes  int
-	numOutputNodes int
 	maxNodes       int
 	species        []*species
 	generation     int
 	maxFitness     float64
 	averageFitness float64
-	topGenome      *genome
+	topGenome      *Genome
 	game           *Game.Game
 }
 
-func initPool(inNodes, outNodes, poolSize int) *pool {
-	pool := &pool{
+func InitPool(inNodes, outNodes, poolSize int) *Pool {
+	pool := &Pool{
 		poolSize:       poolSize,
-		numInputNodes:  inNodes,
-		numOutputNodes: outNodes,
 		maxNodes:       100000,
 		species:        make([]*species, 0),
 		generation:     1,
@@ -43,7 +39,7 @@ func initPool(inNodes, outNodes, poolSize int) *pool {
 	return pool
 }
 
-func (p *pool) addToSpecies(g *genome) {
+func (p *Pool) addToSpecies(g *Genome) {
 	found := false
 	for s := 0; s < p.poolSize; s++ {
 		if p.species[s].includes(g) {
@@ -53,13 +49,13 @@ func (p *pool) addToSpecies(g *genome) {
 		}
 	}
 	if !found {
-		sp := initSpecies(g, make([]*genome, 0), g.fitness, g.fitness, 0)
+		sp := initSpecies(g, make([]*Genome, 0), g.Fitness, g.Fitness, 0)
 		p.species = append(p.species, sp)
 	}
 }
 
-func (p *pool) calcAdjustedFitness() {
-	allGenomes := make([]*genome, 0)
+func (p *Pool) calcAdjustedFitness() {
+	allGenomes := make([]*Genome, 0)
 	for _, s := range p.species {
 		allGenomes = append(allGenomes, s.genomes...)
 	}
@@ -71,12 +67,12 @@ func (p *pool) calcAdjustedFitness() {
 					counter += 1.0
 				}
 			}
-			g.fitness /= math.Pow(counter, 1.0/3.0)
+			g.Fitness /= math.Pow(counter, 1.0/3.0)
 		}
 	}
 }
 
-func (p *pool) removeStaleSpecies() {
+func (p *Pool) removeStaleSpecies() {
 	tmp := make([]*species, 0)
 	for _, s := range p.species {
 		if s.survives(p.averageFitness) {
@@ -86,8 +82,20 @@ func (p *pool) removeStaleSpecies() {
 	p.species = tmp
 }
 
-func (p *pool) cullSpecies(cutToOne bool) {
+func (p *Pool) cullSpecies(cutToOne bool) {
 	for _, species := range p.species {
 		species.cullSpecies(cutToOne)
 	}
+}
+
+func (p *Pool) GetGenomes() []*Genome {
+	ret := make([]*Genome, 0)
+
+	for _, s := range p.species {
+		for _, g := range s.genomes {
+			ret = append(ret, g)
+		}
+	}
+
+	return ret
 }

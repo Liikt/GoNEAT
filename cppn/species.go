@@ -7,22 +7,22 @@ import (
 )
 
 type species struct {
-	genomes        []*genome
-	representative *genome
+	genomes        []*Genome
+	representative *Genome
 	topFitness     float64
 	averageFitness float64
 	staleness      int
 }
 
-func initSpecies(rep *genome, genomes []*genome, topFit, averageFit float64, staleness int) *species {
+func initSpecies(rep *Genome, genomes []*Genome, topFit, averageFit float64, staleness int) *species {
 	sp := new(species)
 	sp.staleness = staleness
 	sp.representative = rep
 	sp.genomes = genomes
 
 	if rep != nil {
-		sp.topFitness = rep.fitness
-		sp.averageFitness = rep.fitness
+		sp.topFitness = rep.Fitness
+		sp.averageFitness = rep.Fitness
 	} else {
 		sp.topFitness = topFit
 		sp.averageFitness = averageFit
@@ -31,7 +31,7 @@ func initSpecies(rep *genome, genomes []*genome, topFit, averageFit float64, sta
 	return sp
 }
 
-func (s *species) includes(g *genome) bool {
+func (s *species) includes(g *Genome) bool {
 	return s.representative.shareFunction(g)
 }
 
@@ -39,7 +39,7 @@ func (s *species) calcAverageFitness() float64 {
 	ret := 0.0
 
 	for _, g := range s.genomes {
-		ret += g.fitness
+		ret += g.Fitness
 	}
 
 	return ret / float64(len(s.genomes))
@@ -49,16 +49,16 @@ func (s *species) calcTopFitness() float64 {
 	ret := -1000000.0
 
 	for _, g := range s.genomes {
-		if g.fitness > ret {
-			ret = g.fitness
+		if g.Fitness > ret {
+			ret = g.Fitness
 		}
 	}
 
 	return ret
 }
 
-func (s *species) breed() *genome {
-	child := new(genome)
+func (s *species) breed() *Genome {
+	child := new(Genome)
 
 	if rand.Float64() < s.representative.staticRates["CrossoverChance"] {
 		g1 := rand.Intn(len(s.genomes))
@@ -75,7 +75,7 @@ func (s *species) breed() *genome {
 	}
 
 	child.mutate()
-	child.fitness = 0.0
+	child.Fitness = 0.0
 
 	return child
 }
@@ -83,7 +83,7 @@ func (s *species) breed() *genome {
 func (s *species) cullSpecies(cutToOne bool) {
 	sortGenomes(s)
 	for _, x := range s.genomes {
-		fmt.Printf("%v ", x.fitness)
+		fmt.Printf("%v ", x.Fitness)
 	}
 	fmt.Print("\n")
 
