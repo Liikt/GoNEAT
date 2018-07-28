@@ -66,6 +66,15 @@ func (g *gene) String() string {
 		ret += g.destinationNeuron.id + "\n"
 	}
 
+	sid, did := "", ""
+	if g.sourceNeuron != nil {
+		sid = g.sourceNeuron.id
+	}
+
+	if g.destinationNeuron != nil {
+		did = g.destinationNeuron.id
+	}
+
 	return fmt.Sprintln(ret, "ID:", g.id, "Weight:", g.weight, "Enabled", g.enabled, "Innovation:",
-		g.innovation)
+		g.innovation, "Src:", sid, "Dst:", did)
 }
