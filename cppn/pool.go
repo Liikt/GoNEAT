@@ -17,7 +17,7 @@ type Pool struct {
 	game           *Game.Game
 }
 
-func InitPool(inNodes, outNodes, poolSize int) *Pool {
+func InitPool(poolSize int) *Pool {
 	pool := &Pool{
 		poolSize:       poolSize,
 		maxNodes:       100000,
@@ -29,7 +29,7 @@ func InitPool(inNodes, outNodes, poolSize int) *Pool {
 		game:           nil,
 	}
 
-	genomeTemplate := initGenome()
+	genomeTemplate := initGenome(true)
 	for x := 0; x < poolSize; x++ {
 		g := genomeTemplate.copy()
 		g.mutate()
@@ -41,7 +41,7 @@ func InitPool(inNodes, outNodes, poolSize int) *Pool {
 
 func (p *Pool) addToSpecies(g *Genome) {
 	found := false
-	for s := 0; s < p.poolSize; s++ {
+	for s := 0; s < len(p.species); s++ {
 		if p.species[s].includes(g) {
 			p.species[s].genomes = append(p.species[s].genomes, g)
 			found = true
@@ -49,7 +49,7 @@ func (p *Pool) addToSpecies(g *Genome) {
 		}
 	}
 	if !found {
-		sp := initSpecies(g, make([]*Genome, 0), g.Fitness, g.Fitness, 0)
+		sp := initSpecies(g, []*Genome{g}, g.Fitness, g.Fitness, 0)
 		p.species = append(p.species, sp)
 	}
 }
@@ -93,7 +93,9 @@ func (p *Pool) GetGenomes() []*Genome {
 
 	for _, s := range p.species {
 		for _, g := range s.genomes {
-			ret = append(ret, g)
+			if g != nil {
+				ret = append(ret, g)
+			}
 		}
 	}
 
