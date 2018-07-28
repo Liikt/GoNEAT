@@ -2,6 +2,7 @@ package substrate
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/liikt/GoNEAT/cppn"
@@ -14,19 +15,36 @@ type Substrate struct {
 	height     int
 	inpNeurons map[string]chan float64
 	outNeurons map[string]chan float64
+	genome     *cppn.Genome
 }
 
 func (s *Substrate) indexToVal(x, y int) (float64, float64) {
-	stepX := 2. / float64(s.width)
-	stepY := 2. / float64(s.height)
+	if s.width > 1 && s.height > 1 {
+		stepX := 2. / float64(s.width-1)
+		stepY := 2. / float64(s.height-1)
 
-	return -1. + (stepX * float64(x)), 1. - (stepY * float64(y))
+		return -1. + (stepX * float64(x)), 1. - (stepY * float64(y))
+	} else {
+		return math.NaN(), math.NaN()
+	}
+
 }
 
-func BuildSubstrate(w, h int, inpNeurons, outNeurons [][]int) *Substrate {
-	ret := &Substrate{width: w, height: h}
+func BuildSubstrate(w, h int, inpNeurons, outNeurons [][]int, g *cppn.Genome) *Substrate {
+	ret := &Substrate{
+		width:      w,
+		height:     h,
+		genome:     g,
+		inpNeurons: make(map[string]chan float64),
+		outNeurons: make(map[string]chan float64),
+	}
+
+	tmpw := make([][]*neuron, w)
+	ret.neurons = tmpw
 
 	for x := 0; x < ret.height; x++ {
+		tmph := make([]*neuron, h)
+		ret.neurons[x] = tmph
 		for y := 0; y < ret.width; y++ {
 			ret.neurons[x][y] = &neuron{id: genID()}
 		}
@@ -49,11 +67,11 @@ func BuildSubstrate(w, h int, inpNeurons, outNeurons [][]int) *Substrate {
 			ret.outNeurons["OUT"+strconv.Itoa(i)] = outChan
 		}
 	}
-
+	ret.populate()
 	return ret
 }
 
-func (s *Substrate) Populate(g *cppn.Genome) {
+func (s *Substrate) populate() {
 	isReachable := make(map[string][]string)
 	for x1 := 0; x1 < s.height; x1++ {
 		for y1 := 0; y1 < s.height; y1++ {
@@ -71,8 +89,9 @@ func (s *Substrate) Populate(g *cppn.Genome) {
 					}
 
 					x2Val, y2Val := s.indexToVal(x2, y2)
-					w := g.GetWeight(x1Val, y1Val, x2Val, y2Val)
+					w := s.genome.GetWeight(x1Val, y1Val, x2Val, y2Val)
 					n2ID := s.neurons[x2][y2].id
+					// fmt.Printf("%v,%v -> %v,%v with weight %v\n", x1, y1, x2, y2, w)
 
 					if w > -8. && w < 8. && !strIn(isReachable[n1ID], n2ID) {
 						for _, n := range isReachable[n1ID] {
@@ -81,7 +100,6 @@ func (s *Substrate) Populate(g *cppn.Genome) {
 							}
 						}
 						isReachable[n2ID] = append(isReachable[n2ID], n1ID)
-
 						srcChan := make(chan float64)
 						dstChan := make(chan float64)
 						newLink := &link{weight: w, src: srcChan, dst: dstChan}
@@ -93,6 +111,7 @@ func (s *Substrate) Populate(g *cppn.Genome) {
 			}
 		}
 	}
+
 }
 
 func (s *Substrate) Run(input []float64) []float64 {
@@ -117,7 +136,8 @@ func (s *Substrate) Run(input []float64) []float64 {
 
 	ret := make([]float64, len(s.outNeurons))
 	for i := 0; i < len(s.outNeurons); i++ {
-		ret[i] = <-s.outNeurons["OUT"+strconv.Itoa(i)]
+		v := <-s.outNeurons["OUT"+strconv.Itoa(i)]
+		ret[i] = v
 	}
 
 	return ret
