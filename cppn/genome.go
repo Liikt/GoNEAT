@@ -21,7 +21,7 @@ type Genome struct {
 	staticRates   map[string]float64
 }
 
-func initGenome() *Genome {
+func initGenome(basic bool) *Genome {
 	g := new(Genome)
 	g.numNodes = 5
 	g.Fitness = 0.0
@@ -41,7 +41,9 @@ func initGenome() *Genome {
 	g.staticRates["PerturbChance"] = 0.95
 	g.staticRates["CrossoverChance"] = 0.75
 
-	g.basicNetwork()
+	if basic {
+		g.basicNetwork()
+	}
 
 	return g
 }
@@ -132,15 +134,16 @@ func (g *Genome) containsLink(link *gene) bool {
 }
 
 func (g *Genome) copy() *Genome {
-	newGenome := initGenome()
+	newGenome := initGenome(false)
 	newGenome.numNodes = g.numNodes
 	newGenome.Fitness = g.Fitness
-	newGenome.network = g.network
+	newGenome.inputNodes = make([]chan float64, 4)
 	newGenome.mutationRates = g.mutationRates
 	newGenome.staticRates = g.staticRates
 
 	for _, n := range g.neurons {
 		newGenome.neurons[n.id] = initNeuron(n.id)
+		newGenome.network[n.id] = []string{}
 	}
 
 	for _, ge := range g.genes {
@@ -160,6 +163,7 @@ func (g *Genome) copy() *Genome {
 		newGenome.inputNodes[x] = inChan
 	}
 
+	fmt.Println(newGenome.GetWeight(234., 3., 8., 5.))
 	return newGenome
 }
 
@@ -186,7 +190,7 @@ func (g *Genome) mutate() {
 		if i == 1 {
 			g.mutationRates[key] = 0.95 * val
 		} else {
-			g.mutationRates[key] = val / 0.95
+			g.mutationRates[key] = 1.05263 * val
 		}
 	}
 
@@ -274,6 +278,9 @@ func (g *Genome) weightGap(other *Genome) float64 {
 		weightDiff += math.Abs(innoToObj1[inno].weight - innoToObj2[inno].weight)
 	}
 
+	if len(matching) == 0 {
+		return 1000000000.
+	}
 	return weightDiff / float64(len(matching))
 }
 
@@ -289,7 +296,7 @@ func (g *Genome) crossover(other *Genome) *Genome {
 		g, other = other, g
 	}
 
-	child := initGenome()
+	child := initGenome(true)
 	child.neurons["OutN"] = g.neurons["OutN"].copy()
 
 	outChan := make(chan float64)
