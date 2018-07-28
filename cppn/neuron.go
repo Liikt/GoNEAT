@@ -80,6 +80,8 @@ func (n *neuron) run() {
 		}
 	}
 
+	value = n.function(value)
+
 	for _, out := range n.outgoing {
 		out <- value
 	}
