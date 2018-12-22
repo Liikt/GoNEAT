@@ -20,3 +20,4 @@
 *.pdf
 test.go
 debug
+*.lua
