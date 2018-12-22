@@ -14,6 +14,7 @@ type Genome struct {
 	numNodes      int
 	maxNeurons    int
 	Fitness       float64
+	globalRank    int
 	genes         map[string]*gene
 	neurons       map[string]*neuron
 	network       map[string][]string
@@ -23,6 +24,7 @@ type Genome struct {
 
 func initGenome(basic bool) *Genome {
 	g := new(Genome)
+	g.globalRank = 0
 	g.numNodes = 5
 	g.Fitness = 0.0
 	g.genes = make(map[string]*gene)
