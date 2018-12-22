@@ -5,26 +5,24 @@ import (
 	"github.com/liikt/GoNEAT/game"
 )
 
-var id = 1
+var id uint64 = 2
 
 type GlobalCTX struct {
-	pool *cppn.Pool
+	pool     *cppn.Pool
+	curChamp *game.Player
 }
 
 type LocalCTX struct {
-	game    *game.Game
-	player1 *game.Player
-	player2 *game.Player
+	game   *game.Game
+	player *game.Player
 }
 
 func NewGlobalCtx(size int) *GlobalCTX {
 	return &GlobalCTX{pool: cppn.InitPool(size)}
 }
 
-func NewLocalCTX() *LocalCTX {
-	p1 := game.NewPlayer(id)
+func (gctx *GlobalCTX) NewLocalCTX() *LocalCTX {
+	p := game.NewPlayer(id)
 	id++
-	p2 := game.NewPlayer(id)
-	id++
-	return &LocalCTX{game: game.NewAIGame(p1, p2), player1: p1, player2: p2}
+	return &LocalCTX{game: game.NewAIGame(gctx.curChamp, p), player: p}
 }
