@@ -2,8 +2,6 @@ package cppn
 
 import (
 	"math"
-
-	"github.com/liikt/GoNEAT/Game"
 )
 
 type Pool struct {
@@ -14,7 +12,6 @@ type Pool struct {
 	maxFitness     float64
 	averageFitness float64
 	topGenome      *Genome
-	game           *Game.Game
 }
 
 func InitPool(poolSize int) *Pool {
@@ -26,7 +23,6 @@ func InitPool(poolSize int) *Pool {
 		maxFitness:     0.0,
 		averageFitness: 0.0,
 		topGenome:      nil,
-		game:           nil,
 	}
 
 	genomeTemplate := initGenome(true)
