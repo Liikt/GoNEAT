@@ -14,6 +14,7 @@ This project has been heavily inspired by Sethblings [MarI/O](https://www.youtub
 
 * [x] Finish the CPPN
 * [x] Write the code for the substrate
+* [ ] Write the code for the player
 * [ ] Write the code for the framework
 * [ ] Test the network on Tic Tac Toe
 * [ ] Write a general interface for more games and different substrate variations
