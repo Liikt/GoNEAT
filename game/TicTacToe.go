@@ -13,13 +13,15 @@ import (
 )
 
 type Player struct {
-	ID int
-	AI *substrate.Substrate
+	ID          uint64
+	AI          *substrate.Substrate
+	GamesPlayed int
+	GamesWon    int
 }
 type Game struct {
 	Round   int
-	Board   []int
-	Convert map[int]string
+	Board   []uint64
+	Convert map[uint64]string
 	Player1 *Player
 	Player2 *Player
 }
@@ -41,12 +43,12 @@ func containsInt(arr []int, i int) bool {
 
 func newGame() *Game {
 	g := new(Game)
-	g.Convert = map[int]string{0: " ", 1: "O", 2: "X"}
-	g.Board = []int{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	g.Convert = map[uint64]string{0: " ", 1: "O", 2: "X"}
+	g.Board = []uint64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	return g
 }
 
-func NewPlayer(id int) *Player {
+func NewPlayer(id uint64) *Player {
 	return &Player{ID: id}
 }
 
@@ -58,16 +60,16 @@ func NewAIGame(p1, p2 *Player) *Game {
 	g.Round = 0
 	g.Player1 = p1
 	g.Player2 = p2
-	g.Convert = map[int]string{0: " ", p1.ID: "O", p2.ID: "X"}
-	g.Board = []int{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	g.Convert = map[uint64]string{0: " ", p1.ID: "O", p2.ID: "X"}
+	g.Board = []uint64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	return g
 }
 
 func (g *Game) Reset() {
-	g.Board = []int{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	g.Board = []uint64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 }
 
-func (g *Game) printField(player int) {
+func (g *Game) printField(player uint64) {
 	fmt.Printf("%v|%v|%v\n", g.Convert[g.Board[0]], g.Convert[g.Board[1]], g.Convert[g.Board[2]])
 	fmt.Printf("-+-+-\n")
 	fmt.Printf("%v|%v|%v\n", g.Convert[g.Board[3]], g.Convert[g.Board[4]], g.Convert[g.Board[5]])
@@ -83,14 +85,6 @@ func index(arr []int, el int) int {
 		}
 	}
 	return -1
-}
-
-func (g *Game) GetBoardState(p *Player) string {
-	ret := strconv.Itoa(g.Board[0])
-	for x := 1; x < len(g.Board); x++ {
-		ret += " " + strconv.Itoa(g.Board[x])
-	}
-	return ret
 }
 
 func (g *Game) checkWin(move int) bool {
@@ -124,31 +118,39 @@ func (g *Game) checkWin(move int) bool {
 }
 
 func (g *Game) DoMove(p *Player) result {
-	min := g.Board[0]
-	for _, val := range g.Board {
-		if min == 0 && val != 0 || val != 0 && val < min {
-			min = val
-		}
-	}
-	newBoard := make([]float64, len(g.Board))
-	for i := range newBoard {
-		if g.Board[i] == 0 {
-			continue
-		} else if g.Board[i] == min {
-			newBoard[i] = 0.5
-		} else {
-			newBoard[i] = 1
-		}
-	}
-
-	res := p.AI.Run(newBoard)
-	max := res[0]
 	idx := 0
+	// Starting AI which is random
+	if p.ID == 1 {
+		idx = rand.Intn(len(g.Board))
+		for idx != 0 {
+			idx = rand.Intn(len(g.Board))
+		}
+	} else {
+		min := g.Board[0]
+		for _, val := range g.Board {
+			if min == 0 && val != 0 || val != 0 && val < min {
+				min = val
+			}
+		}
+		newBoard := make([]float64, len(g.Board))
+		for i := range newBoard {
+			if g.Board[i] == 0 {
+				continue
+			} else if g.Board[i] == min {
+				newBoard[i] = 0.5
+			} else {
+				newBoard[i] = 1
+			}
+		}
 
-	for i, v := range res {
-		if v > max {
-			idx = i
-			max = v
+		res := p.AI.Run(newBoard)
+		max := res[0]
+
+		for i, v := range res {
+			if v > max {
+				idx = i
+				max = v
+			}
 		}
 	}
 
@@ -188,8 +190,8 @@ func doMoveHuman() int {
 	return num
 }
 
-func (g *Game) runGame() (int, int) {
-	turn := rand.Intn(2)
+func (g *Game) runGame() (uint64, int) {
+	turn := uint64(rand.Intn(2))
 
 	for gameRound := 0; gameRound < 9; gameRound++ {
 		g.printField(turn)
