@@ -10,7 +10,7 @@ type species struct {
 	genomes        []*Genome
 	representative *Genome
 	topFitness     float64
-	averageFitness float64
+	AverageFitness float64
 	staleness      int
 }
 
@@ -22,10 +22,10 @@ func initSpecies(rep *Genome, genomes []*Genome, topFit, averageFit float64, sta
 
 	if rep != nil {
 		sp.topFitness = rep.Fitness
-		sp.averageFitness = rep.Fitness
+		sp.AverageFitness = rep.Fitness
 	} else {
 		sp.topFitness = topFit
-		sp.averageFitness = averageFit
+		sp.AverageFitness = averageFit
 	}
 
 	return sp
@@ -33,16 +33,6 @@ func initSpecies(rep *Genome, genomes []*Genome, topFit, averageFit float64, sta
 
 func (s *species) includes(g *Genome) bool {
 	return s.representative.shareFunction(g)
-}
-
-func (s *species) calcAverageFitness() float64 {
-	ret := 0.0
-
-	for _, g := range s.genomes {
-		ret += g.Fitness
-	}
-
-	return ret / float64(len(s.genomes))
 }
 
 func (s *species) calcTopFitness() float64 {
@@ -57,7 +47,7 @@ func (s *species) calcTopFitness() float64 {
 	return ret
 }
 
-func (s *species) breed() *Genome {
+func (s *species) Breed() *Genome {
 	child := new(Genome)
 
 	if rand.Float64() < s.representative.staticRates["CrossoverChance"] {
@@ -110,4 +100,12 @@ func (s *species) survives(poolFitness float64) bool {
 		return false
 	}
 	return true
+}
+
+func (s *species) CalcAverageFitness() {
+	total := 0.0
+	for _, g := range s.genomes {
+		total += g.Fitness
+	}
+	s.AverageFitness = total / float64(len(s.genomes))
 }
