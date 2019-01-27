@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Genome struct {
@@ -165,19 +166,30 @@ func (g *Genome) copy() *Genome {
 		newGenome.inputNodes[x] = inChan
 	}
 
-	fmt.Println(newGenome.GetWeight(234., 3., 8., 5.))
+	// fmt.Println(newGenome.GetWeight(234., 3., 8., 5.))
 	return newGenome
 }
 
 func (g *Genome) GetWeight(x1, y1, x2, y2 float64) float64 {
-	for _, gene := range g.genes {
-		go gene.run()
-	}
+	wg := new(sync.WaitGroup)
+	wg.Add(len(g.genes) + len(g.neurons))
+	go func() {
+		for _, gene := range g.genes {
+			// fmt.Println("Starting", gene.id)
+			go gene.run()
+			wg.Done()
+		}
+	}()
 
-	for _, neuron := range g.neurons {
-		go neuron.run()
-	}
+	go func() {
+		for _, neuron := range g.neurons {
+			// fmt.Println("Starting", neuron.id)
+			go neuron.run()
+			wg.Done()
+		}
+	}()
 
+	wg.Wait()
 	g.inputNodes[0] <- x1
 	g.inputNodes[1] <- y1
 	g.inputNodes[2] <- x2
