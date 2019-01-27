@@ -1,13 +1,14 @@
 package cppn
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/satori/go.uuid"
 )
 
 var (
-	innovation      = 0
+	Innovation      = 0
 	innovationMutex = new(sync.Mutex)
 )
 
@@ -35,8 +36,8 @@ func indexGene(m map[int]*gene) (keys []int) {
 func newInnovation() int {
 	innovationMutex.Lock()
 	defer innovationMutex.Unlock()
-	innovation++
-	return innovation
+	Innovation++
+	return Innovation
 }
 
 func containsInt(arr []int, i int) bool {
@@ -91,6 +92,17 @@ func truncateValue(value float64) float64 {
 
 func genID() string {
 	return uuid.Must(uuid.NewV4()).String()
+}
+
+func (p *Pool) ChangeChamp(threshold float64) bool {
+	counter := 0.0
+	genomes := p.GetGenomes()
+	for _, g := range genomes {
+		counter += g.Fitness
+	}
+	avg := counter / float64(len(genomes))
+	fmt.Println("Average Winrate =", avg)
+	return avg >= threshold
 }
 
 func merge(cs ...chan float64) chan float64 {

@@ -9,27 +9,24 @@ import (
 	"strings"
 	"time"
 
+	"github.com/liikt/GoNEAT/cppn"
 	"github.com/liikt/GoNEAT/substrate"
 )
 
 type Player struct {
-	ID          uint64
-	AI          *substrate.Substrate
-	GamesPlayed int
-	GamesWon    int
+	ID     uint64
+	AI     substrate.Substrate
+	Genome *cppn.Genome
 }
 type Game struct {
 	Round   int
 	Board   []uint64
 	Convert map[uint64]string
-	Player1 *Player
-	Player2 *Player
 }
 
-type result struct {
+type Result struct {
 	Continue bool
 	Won      bool
-	Round    int
 }
 
 func containsInt(arr []int, i int) bool {
@@ -53,19 +50,15 @@ func NewPlayer(id uint64) *Player {
 }
 
 func NewAIGame(p1, p2 *Player) *Game {
-	if p2.ID < p1.ID {
-		p1, p2 = p2, p1
-	}
 	g := new(Game)
 	g.Round = 0
-	g.Player1 = p1
-	g.Player2 = p2
 	g.Convert = map[uint64]string{0: " ", p1.ID: "O", p2.ID: "X"}
 	g.Board = []uint64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	return g
 }
 
 func (g *Game) Reset() {
+	g.Round = 1
 	g.Board = []uint64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 }
 
@@ -117,7 +110,7 @@ func (g *Game) checkWin(move int) bool {
 	return false
 }
 
-func (g *Game) DoMove(p *Player) result {
+func (g *Game) DoMove(p *Player) *Result {
 	idx := 0
 	// Starting AI which is random
 	if p.ID == 1 {
@@ -155,16 +148,16 @@ func (g *Game) DoMove(p *Player) result {
 	}
 
 	if g.Board[idx] != 0 {
-		return result{Round: g.Round, Continue: false, Won: false}
+		return &Result{Continue: false, Won: false}
 	}
 
 	g.Board[idx] = p.ID
-	g.Round++
 	if g.checkWin(idx) {
-		return result{Round: g.Round, Continue: false, Won: true}
+		return &Result{Continue: false, Won: true}
 	}
 
-	return result{Round: g.Round, Continue: true, Won: false}
+	g.Round++
+	return &Result{Continue: true, Won: false}
 }
 
 func doMoveHuman() int {

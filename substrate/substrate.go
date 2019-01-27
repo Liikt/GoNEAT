@@ -15,7 +15,7 @@ type Substrate struct {
 	height     int
 	inpNeurons map[string]chan float64
 	outNeurons map[string]chan float64
-	genome     *cppn.Genome
+	Genome     *cppn.Genome
 }
 
 func (s *Substrate) indexToVal(x, y int) (float64, float64) {
@@ -24,9 +24,8 @@ func (s *Substrate) indexToVal(x, y int) (float64, float64) {
 		stepY := 2. / float64(s.height-1)
 
 		return -1. + (stepX * float64(x)), 1. - (stepY * float64(y))
-	} else {
-		return math.NaN(), math.NaN()
 	}
+	return math.NaN(), math.NaN()
 
 }
 
@@ -34,7 +33,7 @@ func BuildSubstrate(w, h int, inpNeurons, outNeurons [][]int, g *cppn.Genome) *S
 	ret := &Substrate{
 		width:      w,
 		height:     h,
-		genome:     g,
+		Genome:     g,
 		inpNeurons: make(map[string]chan float64),
 		outNeurons: make(map[string]chan float64),
 	}
@@ -49,7 +48,6 @@ func BuildSubstrate(w, h int, inpNeurons, outNeurons [][]int, g *cppn.Genome) *S
 			ret.neurons[x][y] = &neuron{id: genID()}
 		}
 	}
-
 	for i, l := range inpNeurons {
 		if l[0] >= 0 && l[0] < ret.width && l[1] >= 0 && l[1] < ret.height {
 			inpChan := make(chan float64)
@@ -89,9 +87,8 @@ func (s *Substrate) populate() {
 					}
 
 					x2Val, y2Val := s.indexToVal(x2, y2)
-					w := s.genome.GetWeight(x1Val, y1Val, x2Val, y2Val)
+					w := s.Genome.GetWeight(x1Val, y1Val, x2Val, y2Val)
 					n2ID := s.neurons[x2][y2].id
-					// fmt.Printf("%v,%v -> %v,%v with weight %v\n", x1, y1, x2, y2, w)
 
 					if w > -8. && w < 8. && !strIn(isReachable[n1ID], n2ID) {
 						for _, n := range isReachable[n1ID] {
@@ -111,13 +108,12 @@ func (s *Substrate) populate() {
 			}
 		}
 	}
-
 }
 
 func (s *Substrate) Run(input []float64) []float64 {
 	if len(input) != len(s.inpNeurons) {
-		fmt.Println("Wrong input array size", len(input), len(s.inpNeurons))
-		return []float64{}
+		msg := fmt.Sprintln("Wrong input array size", len(input), len(s.inpNeurons))
+		panic(msg)
 	}
 
 	for _, l := range s.links {

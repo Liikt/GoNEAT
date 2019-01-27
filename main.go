@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/liikt/GoNEAT/framework"
 )
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	fmt.Println("The CPPN is working at least.")
+	ctx := framework.NewGlobalCtx(100)
+	fmt.Println("Starting the Simulation")
+	ctx.Epoch()
 }
