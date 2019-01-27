@@ -30,10 +30,13 @@ func sigmoig(inp float64) float64 {
 func (n *neuron) run() {
 	v := 0.0
 	in := merge(n.incoming...)
+
 	for i := range in {
 		v += i
 	}
+
 	v = sigmoig(v)
+
 	for _, c := range n.outgoing {
 		c <- v
 	}

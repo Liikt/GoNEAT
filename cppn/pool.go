@@ -131,6 +131,14 @@ func (p *Pool) RemoveWeakSpecies() {
 	p.Species = survived
 }
 
+func (p *Pool) printLog() {
+	for idx, spec := range p.Species {
+		if spec.AverageFitness > 0.2 {
+			fmt.Println("Species idx:", idx, "Average Fitness:", spec.AverageFitness, "Top Fitness:", spec.topFitness)
+		}
+	}
+}
+
 func (p *Pool) NewGeneration() {
 	p.CullSpecies(false)
 	p.RankGlobally()
@@ -139,6 +147,7 @@ func (p *Pool) NewGeneration() {
 	for _, s := range p.Species {
 		s.CalcAverageFitness()
 	}
+	p.printLog()
 	p.RemoveWeakSpecies()
 	sum := p.CalcTotalAvgFitness()
 	children := make([]*Genome, 0)
@@ -156,6 +165,5 @@ func (p *Pool) NewGeneration() {
 	for _, c := range children {
 		p.AddToSpecies(c)
 	}
-	fmt.Println("Done with Generation", p.Generation)
 	p.Generation++
 }

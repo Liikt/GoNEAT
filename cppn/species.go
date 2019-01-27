@@ -1,7 +1,6 @@
 package cppn
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 )
@@ -72,10 +71,6 @@ func (s *species) Breed() *Genome {
 
 func (s *species) cullSpecies(cutToOne bool) {
 	sortGenomes(s)
-	for _, x := range s.genomes {
-		fmt.Printf("%v ", x.Fitness)
-	}
-	fmt.Print("\n")
 
 	cut := int(math.Ceil(float64(len(s.genomes)) / 2.0))
 
